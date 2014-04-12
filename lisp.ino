@@ -1,3 +1,7 @@
+#include <avr/pgmspace.h>
+
+PROGMEM char * MAX_120_CHARS[] = { "\nMax 120 chars per line" };
+
 char input[120];
 int on_board_led = 13;
 
@@ -35,18 +39,31 @@ void loop() {
       // Next byte is set to NIL to prevent from keeping old data.
       input[char_count] = '\0';
     }
+    
+  if (char_count >= 120)
+  {
+    Serial.println(*MAX_120_CHARS);
+  } 
   Serial.println(parse_line(input));
 }
 
 int parse_line(char * data) {
-   int a = 0;
-   int b = 0;
+  int a = 0;
+  int b = 0;
 
-   if (data[2] >= '0' && data[2] <= '9')
-     a = data[2] - '0';
-   if (data[4] >= '0' && data[4] <= '9')
-     b = data[4] - '0';
-   
+  if (data[2] >= '0' && data[2] <= '9')
+    a = data[2] - '0';
+  if (data[4] >= '0' && data[4] <= '9')
+    b = data[4] - '0';
+  
+  if (data[0] == 'd')
+  {
+    if (data[2] == '1' && data[3] == '3')
+      if (data[5] == '1')
+        digitalWrite(on_board_led, HIGH); 
+      else if (data[5] == '0')
+        digitalWrite(on_board_led, LOW);
+  }
   
   if (data[0] == '+')
     return a + b;
@@ -56,4 +73,7 @@ int parse_line(char * data) {
     return a * b;
   else if (data[0] == '/')
     return a / b;
+  else
+    return 0;
 }
+
